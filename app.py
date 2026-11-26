@@ -225,7 +225,7 @@ page = st.sidebar.radio(
 # ---------- LOAD MODEL ----------
 
 try:
-    with st.spinner("Loading local AI models..."):
+    with st.spinner("Connecting to Groq AI and loading embeddings..."):
         retriever, llm = load_rag()
 
 except Exception as error:

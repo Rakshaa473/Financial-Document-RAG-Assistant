@@ -11,3 +11,4 @@ sentence-transformers
 streamlit
 pandas
 python-dotenv
+langchain-groq

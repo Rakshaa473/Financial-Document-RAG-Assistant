@@ -1,7 +1,7 @@
 
 from pathlib import Path
 
-from langchain_ollama import ChatOllama
+from langchain_groq import ChatGroq
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_chroma import Chroma
 from langchain_core.prompts import ChatPromptTemplate
@@ -50,11 +50,11 @@ def create_rag_assistant():
     )
 
     # Step 4: Load local Llama model
-    print("Loading Llama model...")
+    print("Connecting to Groq cloud model...")
 
-    llm = ChatOllama(
-        model="llama3.2:3b",
-        temperature=0.1
+    llm = ChatGroq(
+    model="openai/gpt-oss-20b",
+    temperature=0.1
     )
 
     print("\nRAG Assistant is ready!")

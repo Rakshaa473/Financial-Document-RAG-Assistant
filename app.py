@@ -4,6 +4,8 @@ from datetime import datetime
 import csv
 
 import streamlit as st
+import os
+os.environ["GROQ_API_KEY"] = st.secrets["GROQ_API_KEY"]
 import pandas as pd
 
 from langchain_ollama import ChatOllama

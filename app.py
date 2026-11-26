@@ -276,18 +276,23 @@ page = st.sidebar.radio(
 
 # ---------- LOAD MODEL ----------
 
+
+# ---------- LOAD MODEL ----------
+
 try:
-    with st.spinner("Connecting to Groq AI and loading embeddings..."):
+    with st.spinner("Loading financial AI system..."):
         retriever, llm, chunk_count = load_rag()
-st.sidebar.metric("Indexed chunks", chunk_count)
+
+    st.sidebar.metric("Indexed chunks", chunk_count)
 
 except Exception as error:
     st.error(f"Could not load the RAG system: {error}")
     st.info(
-    "Check that GROQ_API_KEY is configured in Streamlit Secrets "
-    "and that ChromaDB contains the fin_kb collection."
-)
+        "Check your Groq API key, PDF files, "
+        "dependencies, and ChromaDB."
+    )
     st.stop()
+
 
 
 # ---------- CHAT ASSISTANT ----------

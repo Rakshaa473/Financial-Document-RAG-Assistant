@@ -141,7 +141,7 @@ def load_rag():
         api_key=st.secrets["GROQ_API_KEY"]
     )
 
-    return retriever, llm
+    return retriever, llm, vector_store._collection.count()
 
 
 
@@ -278,7 +278,8 @@ page = st.sidebar.radio(
 
 try:
     with st.spinner("Connecting to Groq AI and loading embeddings..."):
-        retriever, llm = load_rag()
+        retriever, llm, chunk_count = load_rag()
+st.sidebar.metric("Indexed chunks", chunk_count)
 
 except Exception as error:
     st.error(f"Could not load the RAG system: {error}")

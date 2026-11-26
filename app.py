@@ -231,9 +231,9 @@ try:
 except Exception as error:
     st.error(f"Could not load the RAG system: {error}")
     st.info(
-        "Check that Ollama is running, llama3.2:3b is installed, "
-        "and ChromaDB contains the fin_kb collection."
-    )
+    "Check that GROQ_API_KEY is configured in Streamlit Secrets "
+    "and that ChromaDB contains the fin_kb collection."
+)
     st.stop()
 
 

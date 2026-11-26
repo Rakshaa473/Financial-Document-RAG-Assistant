@@ -84,10 +84,11 @@ def load_rag():
         search_kwargs={"k": 5, "fetch_k": 15}
     )
 
-    llm = ChatOllama(
-        model="llama3.2:3b",
-        temperature=0.1
-    )
+    llm = ChatGroq(
+    model="openai/gpt-oss-20b",
+    temperature=0.1,
+    api_key=st.secrets["GROQ_API_KEY"]
+)
 
     return retriever, llm
 

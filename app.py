@@ -7,7 +7,9 @@ import streamlit as st
 import os
 os.environ["GROQ_API_KEY"] = st.secrets["GROQ_API_KEY"]
 import pandas as pd
-
+import pdfplumber
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_core.documents import Document
 from langchain_groq import ChatGroq
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_chroma import Chroma
@@ -64,37 +66,83 @@ def save_log(question, answer, sources):
 
 # ---------- LOAD RAG COMPONENTS ----------
 
+
 @st.cache_resource
 def load_rag():
 
+    # 1. Load embedding model
     embeddings = HuggingFaceEmbeddings(
         model_name="sentence-transformers/all-MiniLM-L6-v2",
         model_kwargs={"device": "cpu"},
         encode_kwargs={"normalize_embeddings": True}
     )
 
+    # 2. Connect to ChromaDB
     vector_store = Chroma(
         collection_name=COLLECTION_NAME,
         embedding_function=embeddings,
         persist_directory=str(CHROMA_DIR)
     )
-    st.sidebar.write(
-    "Indexed chunks:",
-    vector_store._collection.count()
-)
 
+    # 3. Automatically index PDFs if database is empty
+    if vector_store._collection.count() == 0:
+
+        st.info("Building the financial document knowledge base...")
+
+        pdf_files = list(DATA_DIR.glob("*.pdf"))
+
+        if not pdf_files:
+            raise FileNotFoundError("No PDF files found in data folder.")
+
+        all_documents = []
+
+        for pdf in pdf_files:
+            with pdfplumber.open(pdf) as document:
+
+                for page_number, page in enumerate(document.pages, start=1):
+                    text = page.extract_text() or ""
+
+                    if text.strip():
+                        all_documents.append(
+                            Document(
+                                page_content=text,
+                                metadata={
+                                    "source": pdf.name,
+                                    "page": page_number,
+                                    "doc_type": pdf.stem
+                                }
+                            )
+                        )
+
+        if not all_documents:
+            raise ValueError("No readable text found in the PDFs.")
+
+        # 4. Split documents into chunks
+        splitter = RecursiveCharacterTextSplitter(
+            chunk_size=1000,
+            chunk_overlap=200
+        )
+
+        chunks = splitter.split_documents(all_documents)
+
+        # 5. Store chunks in ChromaDB
+        vector_store.add_documents(chunks)
+
+    # 6. Create MMR retriever
     retriever = vector_store.as_retriever(
         search_type="mmr",
         search_kwargs={"k": 5, "fetch_k": 15}
     )
 
+    # 7. Connect to Groq cloud LLM (not local Ollama)
     llm = ChatGroq(
-    model="openai/gpt-oss-20b",
-    temperature=0.1,
-    api_key=st.secrets["GROQ_API_KEY"]
-)
+        model="openai/gpt-oss-20b",
+        temperature=0.1,
+        api_key=st.secrets["GROQ_API_KEY"]
+    )
 
     return retriever, llm
+
 
 
 # ---------- QUESTION REWRITING ----------

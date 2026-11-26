@@ -78,6 +78,10 @@ def load_rag():
         embedding_function=embeddings,
         persist_directory=str(CHROMA_DIR)
     )
+    st.sidebar.write(
+    "Indexed chunks:",
+    vector_store._collection.count()
+)
 
     retriever = vector_store.as_retriever(
         search_type="mmr",

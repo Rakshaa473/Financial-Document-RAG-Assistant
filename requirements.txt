@@ -12,3 +12,10 @@ streamlit
 pandas
 python-dotenv
 langchain-groq
+
+
+
+
+
+
+
